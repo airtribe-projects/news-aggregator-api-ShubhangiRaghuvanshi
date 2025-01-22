@@ -33,14 +33,12 @@ tap.test('POST /api/v1/users/register', async (t) => {
     t.end();
 });
 
-tap.test('POST /api/v1/users/register with missing email', async (t) => {
-    const response = await server.post('/api/v1/users/register').send({
-        name: mockUser.name,
-        password: mockUser.password
-    });
-    t.equal(response.status, 400); // Expecting status 400 for missing email
-    t.end();
+const response = await server.post('/api/v1/users/register').send({
+    username: 'mockUser',  // Ensure username is included
+    password: mockUser.password
 });
+t.equal(response.status, 400); // Expecting status 400 for missing email
+
 
 tap.test('POST /api/v1/users/login', async (t) => { 
     const response = await server.post('/api/v1/users/login').send({
