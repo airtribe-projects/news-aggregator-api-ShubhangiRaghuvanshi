@@ -1,13 +1,20 @@
+
+  
+
+
+
+
+
 const tap = require('tap');
 const supertest = require('supertest');
 const app = require('../app');
 const server = supertest(app);
 
 const mockUser = {
-    name: 'Clark Kent',
-    email: 'clark@superman.com',
-    password: 'Krypt()n8',
-    preferences:['movies', 'comics']
+    "username": "Clark Kent",
+    "email": "clark@superman.com",
+    "password": "Krypt()n8",
+    "preferences":["movies", "comics"]
 };
 
 let token = '';
@@ -84,7 +91,7 @@ tap.test('Check PUT /users/preferences', async (t) => {
 tap.test('GET /news', async (t) => {
     const response = await server.get('/news').set('Authorization', `Bearer ${token}`);
     t.equal(response.status, 200);
-    t.hasOwnProp(response.body, 'news');
+    t.hasOwnProp(response.body, 'articles');
     t.end();
 });
 
