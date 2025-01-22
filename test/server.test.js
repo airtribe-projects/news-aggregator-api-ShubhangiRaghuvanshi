@@ -5,111 +5,104 @@
 
 
 
-const request = require('supertest');
-const mongoose = require('mongoose');
+const tap = require('tap');
+const supertest = require('supertest');
 const app = require('../app');
-const User = require('../models/User'); // Adjust path to your User model
-require('dotenv').config();
+const server = supertest(app);
 
-describe('API Tests', () => {
-    let token;
+const mockUser = {
+    "username": "Clark Kent",
+    "email": "clark@superman.com",
+    "password": "Krypt()n8",
+    "preferences":["movies", "comics"]
+};
 
-    beforeAll(async () => {
-        // Connect to the test database
-        await mongoose.connect(process.env.TEST_MONGO_URL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+let token = '';
+
+// Auth tests
+
+tap.test('POST /users/signup', async (t) => { 
+    const response = await server.post('/users/signup').send(mockUser);
+    t.equal(response.status, 200);
+    t.end();
+});
+
+tap.test('POST /users/signup with missing email', async (t) => {
+    const response = await server.post('/users/signup').send({
+        name: mockUser.name,
+        password: mockUser.password
     });
+    t.equal(response.status, 400);
+    t.end();
+});
 
-    afterAll(async () => {
-        // Disconnect from the test database
-        await mongoose.connection.close();
+tap.test('POST /users/login', async (t) => { 
+    const response = await server.post('/users/login').send({
+        email: mockUser.email,
+        password: mockUser.password
     });
+    t.equal(response.status, 200);
+    t.hasOwnProp(response.body, 'token');
+    token = response.body.token;
+    t.end();
+});
 
-    beforeEach(async () => {
-        // Clean up the database before each test
-        await mongoose.connection.db.dropDatabase();
-
-        // Create a test user
-        await User.create({
-            email: 'testuser@example.com',
-            password: 'password123', // Ensure this matches your hashing logic in the app
-        });
-
-        // Log in the test user to get a token
-        const loginRes = await request(app)
-            .post('/api/v1/users/login')
-            .send({ email: 'testuser@example.com', password: 'password123' });
-
-        token = loginRes.body.token;
+tap.test('POST /users/login with wrong password', async (t) => {
+    const response = await server.post('/users/login').send({
+        email: mockUser.email,
+        password: 'wrongpassword'
     });
+    t.equal(response.status, 401);
+    t.end();
+});
 
-    describe('User Registration', () => {
-        it('should register a new user', async () => {
-            const res = await request(app)
-                .post('/api/v1/users/register')
-                .send({ email: 'newuser@example.com', password: 'password123' });
+// Preferences tests
 
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('message', 'User registered successfully.');
-        });
+tap.test('GET /users/preferences', async (t) => {
+    const response = await server.get('/users/preferences').set('Authorization', `Bearer ${token}`);
+    t.equal(response.status, 200);
+    t.hasOwnProp(response.body, 'preferences');
+    t.same(response.body.preferences, mockUser.preferences);
+    t.end();
+});
+
+tap.test('GET /users/preferences without token', async (t) => {
+    const response = await server.get('/users/preferences');
+    t.equal(response.status, 401);
+    t.end();
+});
+
+tap.test('PUT /users/preferences', async (t) => {
+    const response = await server.put('/users/preferences').set('Authorization', `Bearer ${token}`).send({
+        preferences: ['movies', 'comics', 'games']
     });
+    t.equal(response.status, 200);
+});
 
-    describe('User Login', () => {
-        it('should log in an existing user', async () => {
-            const res = await request(app)
-                .post('/api/v1/users/login')
-                .send({ email: 'testuser@example.com', password: 'password123' });
+tap.test('Check PUT /users/preferences', async (t) => {
+    const response = await server.get('/users/preferences').set('Authorization', `Bearer ${token}`);
+    t.equal(response.status, 200);
+    t.same(response.body.preferences, ['movies', 'comics', 'games']);
+    t.end();
+});
 
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('token');
-        });
+// News tests
 
-        it('should not log in with incorrect password', async () => {
-            const res = await request(app)
-                .post('/api/v1/users/login')
-                .send({ email: 'testuser@example.com', password: 'wrongpassword' });
+tap.test('GET /news', async (t) => {
+    const response = await server.get('/news').set('Authorization', `Bearer ${token}`);
+    t.equal(response.status, 200);
+    t.hasOwnProp(response.body, 'articles');
+    t.end();
+});
 
-            expect(res.status).toBe(401);
-        });
-    });
+tap.test('GET /news without token', async (t) => {
+    const response = await server.get('/news');
+    t.equal(response.status, 401);
+    t.end();
+});
 
-    describe('User Preferences', () => {
-        it('should fetch user preferences', async () => {
-            const res = await request(app)
-                .get('/api/v1/users/preferences')
-                .set('Authorization', `Bearer ${token}`);
 
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('preferences');
-        });
 
-        it('should update user preferences', async () => {
-            const res = await request(app)
-                .put('/api/v1/users/preferences')
-                .set('Authorization', `Bearer ${token}`)
-                .send({ preferences: ['movies', 'comics'] });
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('preferences', ['movies', 'comics']);
-        });
-    });
-
-    describe('News API', () => {
-        it('should fetch news based on preferences', async () => {
-            const res = await request(app)
-                .get('/api/v1/news')
-                .set('Authorization', `Bearer ${token}`);
-
-            expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('articles');
-        });
-
-        it('should return 401 if no token is provided', async () => {
-            const res = await request(app).get('/api/v1/news');
-
-            expect(res.status).toBe(401);
-        });
-    });
+tap.teardown(() => {
+    process.exit(0);
 });
