@@ -1,5 +1,5 @@
 TAP version 14
-Server is up and running on port 4000
+Server is up and running on port 3000
 # Subtest: POST /users/signup
     not ok 1 - should be equal
       ---
@@ -31,7 +31,7 @@ Server is up and running on port 4000
       ...
     
     1..1
-not ok 1 - POST /users/signup # time=161.781ms
+not ok 1 - POST /users/signup # time=122.478ms
   ---
   at:
     fileName: test\server.test.js
@@ -82,7 +82,7 @@ not ok 1 - POST /users/signup # time=161.781ms
       ...
     
     1..1
-not ok 2 - POST /users/signup with missing email # time=26.233ms
+not ok 2 - POST /users/signup with missing email # time=16.263ms
   ---
   at:
     fileName: test\server.test.js
@@ -161,7 +161,7 @@ not ok 2 - POST /users/signup with missing email # time=26.233ms
       ...
     
     1..2
-not ok 3 - POST /users/login # time=224.765ms
+not ok 3 - POST /users/login # time=48.974ms
   ---
   at:
     fileName: test\server.test.js
@@ -212,7 +212,7 @@ not ok 3 - POST /users/login # time=224.765ms
       ...
     
     1..1
-not ok 4 - POST /users/login with wrong password # time=23.079ms
+not ok 4 - POST /users/login with wrong password # time=19.233ms
   ---
   at:
     fileName: test\server.test.js
@@ -324,7 +324,7 @@ not ok 4 - POST /users/login with wrong password # time=23.079ms
       ...
     
     1..3
-not ok 5 - GET /users/preferences # time=40.665ms
+not ok 5 - GET /users/preferences # time=28.298ms
   ---
   at:
     fileName: test\server.test.js
@@ -376,7 +376,7 @@ not ok 5 - GET /users/preferences # time=40.665ms
       ...
     
     1..1
-not ok 6 - GET /users/preferences without token # time=21.897ms
+not ok 6 - GET /users/preferences without token # time=15.919ms
   ---
   at:
     fileName: test\server.test.js
@@ -425,7 +425,7 @@ not ok 6 - GET /users/preferences without token # time=21.897ms
       ...
     
     1..1
-not ok 7 - PUT /users/preferences # time=17.592ms
+not ok 7 - PUT /users/preferences # time=94.603ms
   ---
   at:
     fileName: test\server.test.js
@@ -512,7 +512,7 @@ not ok 7 - PUT /users/preferences # time=17.592ms
       ...
     
     1..2
-not ok 8 - Check PUT /users/preferences # time=29.636ms
+not ok 8 - Check PUT /users/preferences # time=17.019ms
   ---
   at:
     fileName: test\server.test.js
@@ -596,7 +596,7 @@ not ok 8 - Check PUT /users/preferences # time=29.636ms
       ...
     
     1..2
-not ok 9 - GET /news # time=37.197ms
+not ok 9 - GET /news # time=25.082ms
   ---
   at:
     fileName: test\server.test.js
@@ -620,6 +620,6 @@ not ok 9 - GET /news # time=37.197ms
 # Subtest: GET /news without token
     ok 1 - should be equal
     1..1
-ok 10 - GET /news without token # time=28.639ms
+ok 10 - GET /news without token # time=8.004ms
 
 1..10
